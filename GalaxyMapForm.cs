@@ -16,7 +16,7 @@ namespace MapaEstelar
         private GalaxyMap galaxyMap;
         private StarSystem selectedSystem;
         private Panel detailsPanel;
-        //private ContextMenuStrip contextMenu;
+        private ContextMenuStrip contextMenu;
         public GalaxyMapForm()
         {
             this.Text = "Stellar Map";
@@ -36,9 +36,13 @@ namespace MapaEstelar
             };
             this.Controls.Add(detailsPanel);
 
+            contextMenu = new ContextMenuStrip();
+            contextMenu.Items.Add("View Details", null, ViewDetails_Click);
+            contextMenu.Items.Add("Create Route", null, CreateRoute_Click);
+
 
         }
-
+        /*
         private void GalaxyMapForm_MouseClick(object sender, MouseEventArgs e)
         {
             foreach (var system in galaxyMap.StarSystems)
@@ -49,6 +53,36 @@ namespace MapaEstelar
                     //UpdateDetailsPanel(); // Actualizar el panel de detalles
                     this.Invalidate(); // Redibujar la pantalla para reflejar la selección
                     break;
+                }
+            }
+        }
+        */
+
+        private void GalaxyMapForm_MouseClick(object sender, MouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Right)
+            {
+                foreach (var system in galaxyMap.StarSystems)
+                {
+                    if (Math.Abs(e.X - system.X) < 10 && Math.Abs(e.Y - system.Y) < 10)
+                    {
+                        selectedSystem = system;
+                        contextMenu.Show(this, e.Location);
+                        break;
+                    }
+                }
+            }
+            else if (e.Button == MouseButtons.Left)
+            {
+                foreach (var system in galaxyMap.StarSystems)
+                {
+                    if (Math.Abs(e.X - system.X) < 10 && Math.Abs(e.Y - system.Y) < 10)
+                    {
+                        selectedSystem = system;
+                        //UpdateDetailsPanel();
+                        this.Invalidate();
+                        break;
+                    }
                 }
             }
         }
@@ -105,6 +139,17 @@ namespace MapaEstelar
                 };
                 detailsPanel.Controls.Add(connectionsLabel);
             }
+        }
+
+        private void ViewDetails_Click(object sender, EventArgs e)
+        {
+            //UpdateDetailsPanel();
+        }
+
+        private void CreateRoute_Click(object sender, EventArgs e)
+        {
+            // Aquí podrías implementar la lógica para crear una ruta
+            MessageBox.Show($"Creating route to {selectedSystem.Name}");
         }
 
         private void ShowSystemDetails(Graphics g, StarSystem system)
