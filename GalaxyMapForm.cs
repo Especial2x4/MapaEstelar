@@ -17,15 +17,27 @@ namespace MapaEstelar
         private StarSystem selectedSystem;
         private Panel detailsPanel;
         private ContextMenuStrip contextMenu;
+
+        private float zoomFactor = 1.0f;
+        private int offsetX = 0, offsetY = 0;
+        private Point lastMousePosition;
+        private bool isPanning;
+
+
         public GalaxyMapForm()
         {
             this.Text = "Stellar Map";
-            this.Width = 800;
+            this.Width = 1000;
             this.Height = 600;
             this.BackColor = Color.Black;
 
             galaxyMap = new GalaxyMap(10, 800, 600);
             this.MouseClick += GalaxyMapForm_MouseClick;
+
+            //this.MouseWheel += GalaxyMapForm_MouseWheel;
+            //this.MouseDown += GalaxyMapForm_MouseDown;
+            //this.MouseUp += GalaxyMapForm_MouseUp;
+            //this.MouseMove += GalaxyMapForm_MouseMove;
 
             detailsPanel = new Panel()
             {
@@ -39,6 +51,7 @@ namespace MapaEstelar
             contextMenu = new ContextMenuStrip();
             contextMenu.Items.Add("View Details", null, ViewDetails_Click);
             contextMenu.Items.Add("Create Route", null, CreateRoute_Click);
+            contextMenu.Items.Add("Mostrar Sistema Solar", null, ShowSolarSystem_Click);
 
 
         }
@@ -64,10 +77,14 @@ namespace MapaEstelar
             {
                 foreach (var system in galaxyMap.StarSystems)
                 {
+                    //int scaledX = (int)((system.X + offsetX) * zoomFactor);
+                    //int scaledY = (int)((system.Y + offsetY) * zoomFactor);
+
                     if (Math.Abs(e.X - system.X) < 10 && Math.Abs(e.Y - system.Y) < 10)
                     {
                         selectedSystem = system;
                         contextMenu.Show(this, e.Location);
+                        //this.Invalidate();
                         break;
                     }
                 }
@@ -76,6 +93,9 @@ namespace MapaEstelar
             {
                 foreach (var system in galaxyMap.StarSystems)
                 {
+                    //int scaledX = (int)((system.X + offsetX) * zoomFactor);
+                    //int scaledY = (int)((system.Y + offsetY) * zoomFactor);
+
                     if (Math.Abs(e.X - system.X) < 10 && Math.Abs(e.Y - system.Y) < 10)
                     {
                         selectedSystem = system;
@@ -169,12 +189,18 @@ namespace MapaEstelar
             foreach (var system in galaxyMap.StarSystems)
             {
                 // Dibujar los sistemas estelares
+                //int scaledX = (int)((system.X + offsetX) * zoomFactor);
+                //int scaledY = (int)((system.Y + offsetY) * zoomFactor);
+                //Brush brush = (system == selectedSystem) ? Brushes.Green : Brushes.White;
                 g.FillEllipse(Brushes.Yellow, system.X - 5, system.Y - 5, 10, 10);
                 g.DrawString(system.Name, new Font("Arial", 8), Brushes.Red, system.X + 5, system.Y + 5);
 
                 // Dibujar las conexiones
                 foreach (var connectedSystem in system.ConnectedSystems)
                 {
+                    int connectedScaledX = (int)((connectedSystem.X + offsetX) * zoomFactor);
+                    int connectedScaledY = (int)((connectedSystem.Y + offsetY) * zoomFactor);
+                    
                     g.DrawLine(Pens.Cyan, system.X, system.Y, connectedSystem.X, connectedSystem.Y);
                 }
 
@@ -183,12 +209,89 @@ namespace MapaEstelar
             if (selectedSystem != null)
             {
                 ShowSystemDetails(g, selectedSystem);
+                int scaledX = (int)((selectedSystem.X + offsetX) * zoomFactor);
+                int scaledY = (int)((selectedSystem.Y + offsetY) * zoomFactor);
+                g.DrawEllipse(Pens.Green, scaledX - 10, scaledY - 10, 20, 20);
+
+                foreach (var planet in selectedSystem.Planets)
+                {
+                    int planetX = scaledX + (int)(planet.DistanceFromStar * zoomFactor);
+                    g.FillEllipse(Brushes.Blue, planetX - 3, scaledY - 3, 6, 6);
+                    g.DrawString(planet.Name, new Font("Arial", 8), Brushes.Blue, planetX + 5, scaledY + 5);
+                }
             }
 
 
         }
 
-        
+
+        private void ShowSolarSystem_Click(object sender, EventArgs e)
+        {
+            if (selectedSystem != null)
+            {
+                //zoomFactor = 3.0f; // Aumentar el zoom al nivel deseado para mostrar el sistema solar
+                //offsetX = -selectedSystem.X + (800 / (int)(2 * zoomFactor));
+                //offsetY = -selectedSystem.Y + (600 / (int)(2 * zoomFactor));
+                //UpdateDetailsPanel();
+                this.Invalidate();
+            }
+        }
+
+
+
+
+
+
+
+
+
+        // Métodos de Zoom y Paneo
+        /*
+        private void GalaxyMapForm_MouseWheel(object sender, MouseEventArgs e)
+        {
+            float oldZoomFactor = zoomFactor;
+            if (e.Delta > 0)
+            {
+                zoomFactor *= 1.1f;
+            }
+            else
+            {
+                zoomFactor /= 1.1f;
+            }
+
+            // Ajustar la posición de desplazamiento para centrarse en el punto de la rueda del mouse
+            offsetX = (int)((offsetX - e.X / oldZoomFactor) * (zoomFactor / oldZoomFactor) + e.X / zoomFactor);
+            offsetY = (int)((offsetY - e.Y / oldZoomFactor) * (zoomFactor / oldZoomFactor) + e.Y / zoomFactor);
+
+            this.Invalidate(); // Redibujar la pantalla con el nuevo factor de zoom
+        }
+
+        private void GalaxyMapForm_MouseDown(object sender, MouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Left)
+            {
+                lastMousePosition = e.Location;
+                isPanning = true;
+            }
+        }
+
+        private void GalaxyMapForm_MouseUp(object sender, MouseEventArgs e)
+        {
+            isPanning = false;
+        }
+
+        private void GalaxyMapForm_MouseMove(object sender, MouseEventArgs e)
+        {
+            if (isPanning)
+            {
+                offsetX += (e.X - lastMousePosition.X);
+                offsetY += (e.Y - lastMousePosition.Y);
+                lastMousePosition = e.Location;
+                this.Invalidate(); // Redibujar la pantalla con el nuevo desplazamiento
+            }
+        }
+
+
 
 
         /*

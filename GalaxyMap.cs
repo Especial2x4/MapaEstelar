@@ -10,6 +10,7 @@ namespace MapaEstelar
     {
         public List<StarSystem> StarSystems { get; set; }
 
+
         public GalaxyMap(int numSystems, int width, int height)
         {
             StarSystems = new List<StarSystem>();
@@ -20,6 +21,14 @@ namespace MapaEstelar
                 string name = NameGenerator.GenerateStarSystemName();
                 int x = rand.Next(0, width);
                 int y = rand.Next(0, height);
+
+                var system = new StarSystem(name, x, y);
+
+                // Agregar planetas al sistema estelar
+                system.AddPlanet("Planet A", rand.Next(10, 50));
+                system.AddPlanet("Planet B", rand.Next(60, 100));
+                system.AddPlanet("Planet C", rand.Next(110, 150));
+
                 StarSystems.Add(new StarSystem(name, x, y));
             }
 
