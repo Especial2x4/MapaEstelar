@@ -16,6 +16,8 @@ namespace MapaEstelar
         private GalaxyMap galaxyMap;
         private StarSystem selectedSystem;
         private Panel detailsPanel;
+        private Panel testeoPanel;
+        private Panel estelarMapPanel;
         private ContextMenuStrip contextMenu;
 
         private float zoomFactor = 1.0f;
@@ -39,14 +41,48 @@ namespace MapaEstelar
             //this.MouseUp += GalaxyMapForm_MouseUp;
             //this.MouseMove += GalaxyMapForm_MouseMove;
 
-            detailsPanel = new Panel()
+            // Panel que muestra el mapa estelar
+
+            estelarMapPanel = new Panel()
+            {
+                Width = 800,
+                Height = 600,
+                BackColor = Color.Black
+
+
+            };
+            // Suscribirse al evento Paint del Panel
+            estelarMapPanel.Paint += new PaintEventHandler(estelarMapPanel_Paint);
+            // Suscribirse al evento de click
+            estelarMapPanel.MouseClick += GalaxyMapForm_MouseClick;
+
+            estelarMapPanel.MouseClick += ViewDetails_Click;
+
+
+
+            this.Controls.Add(estelarMapPanel);
+
+            // Panel para probar cosas
+
+            testeoPanel = new Panel()
             {
                 Width = 200,
                 Height = this.Height,
                 Left = 800,
+                BackColor = Color.Red
+            };
+            this.Controls.Add(testeoPanel);
+
+            
+            detailsPanel = new Panel()
+            {
+                Width = 200,
+                Height = 400,
+                //Left = 800,
                 BackColor = Color.Black
             };
-            this.Controls.Add(detailsPanel);
+            testeoPanel.Controls.Add(detailsPanel);
+            
 
             contextMenu = new ContextMenuStrip();
             contextMenu.Items.Add("View Details", null, ViewDetails_Click);
@@ -106,7 +142,7 @@ namespace MapaEstelar
                 }
             }
         }
-
+        
         private void UpdateDetailsPanel()
         {
             detailsPanel.Controls.Clear();
@@ -160,10 +196,12 @@ namespace MapaEstelar
                 detailsPanel.Controls.Add(connectionsLabel);
             }
         }
+        
+        
 
         private void ViewDetails_Click(object sender, EventArgs e)
         {
-            //UpdateDetailsPanel();
+            UpdateDetailsPanel();
         }
 
         private void CreateRoute_Click(object sender, EventArgs e)
@@ -172,15 +210,16 @@ namespace MapaEstelar
             MessageBox.Show($"Creating route to {selectedSystem.Name}");
         }
 
-        private void ShowSystemDetails(Graphics g, StarSystem system)
-        {
-            g.DrawString("Selected System:", new Font("Arial", 10, FontStyle.Bold), Brushes.White, 10, 10);
-            g.DrawString($"Name: {system.Name}", new Font("Arial", 8), Brushes.White, 10, 30);
-            g.DrawString($"Position: ({system.X}, {system.Y})", new Font("Arial", 8), Brushes.White, 10, 50);
-            g.DrawString($"Connections: {system.ConnectedSystems.Count}", new Font("Arial", 8), Brushes.White, 10, 70);
-        }
+        // Método para mostrar información del sistema clickeado
+        //private void ShowSystemDetails(Graphics g, StarSystem system)
+        //{
+        //    g.DrawString("Selected System:", new Font("Arial", 10, FontStyle.Bold), Brushes.White, 10, 10);
+        //    g.DrawString($"Name: {system.Name}", new Font("Arial", 8), Brushes.White, 10, 30);
+        //    g.DrawString($"Position: ({system.X}, {system.Y})", new Font("Arial", 8), Brushes.White, 10, 50);
+        //    g.DrawString($"Connections: {system.ConnectedSystems.Count}", new Font("Arial", 8), Brushes.White, 10, 70);
+        //}
 
-        protected override void OnPaint(PaintEventArgs e)
+        private void estelarMapPanel_Paint(object sender, PaintEventArgs e)
         {
             base.OnPaint(e);
 
@@ -208,7 +247,7 @@ namespace MapaEstelar
 
             if (selectedSystem != null)
             {
-                ShowSystemDetails(g, selectedSystem);
+                //ShowSystemDetails(g, selectedSystem);
                 int scaledX = (int)((selectedSystem.X + offsetX) * zoomFactor);
                 int scaledY = (int)((selectedSystem.Y + offsetY) * zoomFactor);
                 g.DrawEllipse(Pens.Green, scaledX - 10, scaledY - 10, 20, 20);
