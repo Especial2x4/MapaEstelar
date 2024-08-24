@@ -8,12 +8,14 @@ namespace MapaEstelar
 {
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics.Eventing.Reader;
     using System.Drawing;
     using System.Windows.Forms;
 
     public class GalaxyMapForm : Form
     {
         private GalaxyMap galaxyMap;
+        private int numSystems = 10; /*Cantidad de sistemas solares que se generan en el mapa, la idea sería hacerlos una constante en un fichero de configuración*/
         private StarSystem selectedSystem;
         private Panel detailsPanel;
         private Panel testeoPanel;
@@ -28,12 +30,13 @@ namespace MapaEstelar
 
         public GalaxyMapForm()
         {
-            this.Text = "Stellar Map";
-            this.Width = 1000;
-            this.Height = 600;
-            this.BackColor = Color.Black;
+            Text = "Stellar Map";
+            Width = 1000;
+            Height = 650;
+            //BackColor = Color.Black;
+            BackColor = Color.Blue;
 
-            galaxyMap = new GalaxyMap(10, 800, 600);
+            galaxyMap = new GalaxyMap(this.numSystems, 800, 600);
             this.MouseClick += GalaxyMapForm_MouseClick;
 
             //this.MouseWheel += GalaxyMapForm_MouseWheel;
@@ -55,7 +58,7 @@ namespace MapaEstelar
             estelarMapPanel.Paint += new PaintEventHandler(estelarMapPanel_Paint);
             // Suscribirse al evento de click
             estelarMapPanel.MouseClick += GalaxyMapForm_MouseClick;
-
+            //Evento importante para mostrar detalles del sistema solar en el panel
             estelarMapPanel.MouseClick += ViewDetails_Click;
 
 
@@ -67,7 +70,7 @@ namespace MapaEstelar
             testeoPanel = new Panel()
             {
                 Width = 200,
-                Height = this.Height,
+                Height = 600,
                 Left = 800,
                 BackColor = Color.Red
             };
@@ -85,7 +88,7 @@ namespace MapaEstelar
             
 
             contextMenu = new ContextMenuStrip();
-            contextMenu.Items.Add("View Details", null, ViewDetails_Click);
+            //contextMenu.Items.Add("View Details", null, ViewDetails_Click);
             contextMenu.Items.Add("Create Route", null, CreateRoute_Click);
             contextMenu.Items.Add("Mostrar Sistema Solar", null, ShowSolarSystem_Click);
 
@@ -121,35 +124,38 @@ namespace MapaEstelar
                         selectedSystem = system;
                         contextMenu.Show(this, e.Location);
                         //this.Invalidate();
+                        estelarMapPanel.Invalidate(); /*Linea importante para que se actualice el puntero*/
                         break;
                     }
                 }
             }
-            else if (e.Button == MouseButtons.Left)
+            if (e.Button == MouseButtons.Left)
             {
                 foreach (var system in galaxyMap.StarSystems)
                 {
-                    //int scaledX = (int)((system.X + offsetX) * zoomFactor);
-                    //int scaledY = (int)((system.Y + offsetY) * zoomFactor);
+                    int scaledX = (int)((system.X + offsetX) * zoomFactor);
+                    int scaledY = (int)((system.Y + offsetY) * zoomFactor);
 
                     if (Math.Abs(e.X - system.X) < 10 && Math.Abs(e.Y - system.Y) < 10)
                     {
                         selectedSystem = system;
+                        //contextMenu.Show(this, e.Location);
                         //UpdateDetailsPanel();
-                        this.Invalidate();
+                        //this.Invalidate();
+                        estelarMapPanel.Invalidate(); /*Linea importante para que se actualice el puntero*/
                         break;
                     }
                 }
             }
         }
-        
+
         private void UpdateDetailsPanel()
         {
             detailsPanel.Controls.Clear();
 
             if (selectedSystem != null)
             {
-                
+
                 Label titleLabel = new Label()
                 {
                     Text = "System Details",
@@ -160,7 +166,7 @@ namespace MapaEstelar
                     AutoSize = true
                 };
                 detailsPanel.Controls.Add(titleLabel);
-                
+
 
                 Label nameLabel = new Label()
                 {
@@ -196,8 +202,8 @@ namespace MapaEstelar
                 detailsPanel.Controls.Add(connectionsLabel);
             }
         }
-        
-        
+
+
 
         private void ViewDetails_Click(object sender, EventArgs e)
         {
@@ -248,16 +254,22 @@ namespace MapaEstelar
             if (selectedSystem != null)
             {
                 //ShowSystemDetails(g, selectedSystem);
-                int scaledX = (int)((selectedSystem.X + offsetX) * zoomFactor);
-                int scaledY = (int)((selectedSystem.Y + offsetY) * zoomFactor);
+                //int scaledX = (int)((selectedSystem.X + offsetX) * zoomFactor);
+                //int scaledY = (int)((selectedSystem.Y + offsetY) * zoomFactor);
+                int scaledX = (int)selectedSystem.X;
+                int scaledY = (int)selectedSystem.Y;
                 g.DrawEllipse(Pens.Green, scaledX - 10, scaledY - 10, 20, 20);
 
-                foreach (var planet in selectedSystem.Planets)
-                {
-                    int planetX = scaledX + (int)(planet.DistanceFromStar * zoomFactor);
-                    g.FillEllipse(Brushes.Blue, planetX - 3, scaledY - 3, 6, 6);
-                    g.DrawString(planet.Name, new Font("Arial", 8), Brushes.Blue, planetX + 5, scaledY + 5);
-                }
+                //selectedSystem = null;
+
+                //foreach (var planet in selectedSystem.Planets)
+                //{
+                //    int planetX = scaledX + (int)(planet.DistanceFromStar * zoomFactor);
+                //    g.FillEllipse(Brushes.Blue, planetX - 3, scaledY - 3, 6, 6);
+                //    g.DrawString(planet.Name, new Font("Arial", 8), Brushes.Blue, planetX + 5, scaledY + 5);
+                //}
+
+                Console.WriteLine("evento desencadenado");
             }
 
 
