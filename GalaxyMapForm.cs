@@ -17,9 +17,13 @@ namespace MapaEstelar
         private GalaxyMap galaxyMap;
         private int numSystems = 10; /*Cantidad de sistemas solares que se generan en el mapa, la idea sería hacerlos una constante en un fichero de configuración*/
         private StarSystem selectedSystem;
+        
         private Panel detailsPanel;
         private Panel testeoPanel;
         private Panel estelarMapPanel;
+        private Panel solarMapPanel;
+
+
         private ContextMenuStrip contextMenu;
 
         private float zoomFactor = 1.0f;
@@ -35,6 +39,7 @@ namespace MapaEstelar
             Height = 650;
             //BackColor = Color.Black;
             BackColor = Color.Blue;
+            
 
             galaxyMap = new GalaxyMap(this.numSystems, 800, 600);
             this.MouseClick += GalaxyMapForm_MouseClick;
@@ -48,6 +53,7 @@ namespace MapaEstelar
 
             estelarMapPanel = new Panel()
             {
+                
                 Width = 800,
                 Height = 600,
                 BackColor = Color.Black
@@ -65,6 +71,27 @@ namespace MapaEstelar
 
             this.Controls.Add(estelarMapPanel);
 
+            // Panel que muestra el sistema solar
+
+            solarMapPanel = new Panel()
+            {
+                Width = 800,
+                Height = 600,
+                BackColor = Color.Azure
+
+
+            };
+            // Suscribirse al evento Paint del Panel
+            //estelarMapPanel.Paint += new PaintEventHandler(estelarMapPanel_Paint);
+            // Suscribirse al evento de click
+            //estelarMapPanel.MouseClick += GalaxyMapForm_MouseClick;
+            //Evento importante para mostrar detalles del sistema solar en el panel
+            //estelarMapPanel.MouseClick += ViewDetails_Click;
+            solarMapPanel.Visible = false;
+
+
+            this.Controls.Add(solarMapPanel);
+
             // Panel para probar cosas
 
             testeoPanel = new Panel()
@@ -80,7 +107,7 @@ namespace MapaEstelar
             detailsPanel = new Panel()
             {
                 Width = 200,
-                Height = 400,
+                Height = 150,
                 //Left = 800,
                 BackColor = Color.Black
             };
@@ -278,12 +305,14 @@ namespace MapaEstelar
 
         private void ShowSolarSystem_Click(object sender, EventArgs e)
         {
-            if (selectedSystem != null)
+            if (selectedSystem != null && selectedSystem.ConnectedSystems.Count > 0)
             {
                 //zoomFactor = 3.0f; // Aumentar el zoom al nivel deseado para mostrar el sistema solar
                 //offsetX = -selectedSystem.X + (800 / (int)(2 * zoomFactor));
                 //offsetY = -selectedSystem.Y + (600 / (int)(2 * zoomFactor));
                 //UpdateDetailsPanel();
+                estelarMapPanel.Visible = false;
+                solarMapPanel.Visible = true;
                 this.Invalidate();
             }
         }
