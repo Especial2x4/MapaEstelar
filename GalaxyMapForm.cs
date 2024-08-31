@@ -34,11 +34,15 @@ namespace MapaEstelar
 
         public GalaxyMapForm()
         {
-            Text = "Stellar Map";
-            Width = 1000;
-            Height = 650;
+            this.FormBorderStyle = FormBorderStyle.FixedSingle; // para que no se redimensione
+            this.StartPosition = FormStartPosition.CenterScreen; // para que aparezca la interfaz en el cento de la pantalla
+            this.MaximizeBox = false;
+            this.Text = "Stellar Map";
+            this.Width = 1000;
+            this.Height = 650;
             //BackColor = Color.Black;
-            BackColor = Color.Blue;
+            this.BackColor = Color.Blue;
+            
             
 
             galaxyMap = new GalaxyMap(this.numSystems, 800, 600);
