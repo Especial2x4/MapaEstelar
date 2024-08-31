@@ -81,6 +81,22 @@ namespace MapaEstelar
 
 
             };
+
+            Button backButton = new Button()
+            {
+                Text = "Volver",
+                //ForeColor = Color.White,
+                //Font = new Font("Arial", 10, FontStyle.Bold),
+                Top = 10,
+                Left = 10,
+                AutoSize = true
+            };
+            // Asignar el evento Click al botón
+            backButton.Click += BackButton_Click;
+
+            solarMapPanel.Controls.Add(backButton);
+
+
             // Suscribirse al evento Paint del Panel
             //estelarMapPanel.Paint += new PaintEventHandler(estelarMapPanel_Paint);
             // Suscribirse al evento de click
@@ -317,7 +333,12 @@ namespace MapaEstelar
             }
         }
 
-
+        // Evento para el botón de volver
+        private void BackButton_Click(object sender, EventArgs e)
+        {
+            solarMapPanel.Visible = false; // Ocultar el panel
+            estelarMapPanel.Visible= true;
+        }
 
 
 
