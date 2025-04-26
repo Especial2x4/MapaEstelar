@@ -34,6 +34,9 @@ namespace MapaEstelar
 
         public GalaxyMapForm()
         {
+            
+            // CARACTERÍSTICAS DE LA VENTANA
+            
             this.FormBorderStyle = FormBorderStyle.FixedSingle; // para que no se redimensione
             this.StartPosition = FormStartPosition.CenterScreen; // para que aparezca la interfaz en el cento de la pantalla
             this.MaximizeBox = false;
@@ -45,15 +48,12 @@ namespace MapaEstelar
             
             
 
-            galaxyMap = new GalaxyMap(this.numSystems, 800, 600);
-            this.MouseClick += GalaxyMapForm_MouseClick;
+            galaxyMap = new GalaxyMap(this.numSystems, 800, 600); // se crea el GalaxyMap
+            //this.MouseClick += GalaxyMapForm_MouseClick; // creo que esto no hace nada
 
-            //this.MouseWheel += GalaxyMapForm_MouseWheel;
-            //this.MouseDown += GalaxyMapForm_MouseDown;
-            //this.MouseUp += GalaxyMapForm_MouseUp;
-            //this.MouseMove += GalaxyMapForm_MouseMove;
+            
 
-            // Panel que muestra el mapa estelar
+            // Panel que muestra el mapa estelar -------------------------------------------------------------------------------
 
             estelarMapPanel = new Panel()
             {
@@ -75,7 +75,7 @@ namespace MapaEstelar
 
             this.Controls.Add(estelarMapPanel);
 
-            // Panel que muestra el sistema solar
+            // Panel que muestra el sistema solar ------------------------------------------------------------------------------
 
             solarMapPanel = new Panel()
             {
@@ -85,6 +85,13 @@ namespace MapaEstelar
 
 
             };
+
+            // Suscribirse al evento Paint del Panel
+            solarMapPanel.Paint += new PaintEventHandler(estelarMapPanel_Paint); // dibuja el sistema
+            // Suscribirse al evento de click
+            solarMapPanel.MouseClick += SolarMapForm_MouseClick; // responde a los eventos de click
+            //Evento importante para mostrar detalles del sistema solar en el panel
+            solarMapPanel.MouseClick += ViewDetails_Click; // muestra los detalles
 
             Button backButton = new Button()
             {
@@ -112,7 +119,7 @@ namespace MapaEstelar
 
             this.Controls.Add(solarMapPanel);
 
-            // Panel para probar cosas
+            // Panel para probar cosas -----------------------------------------------------------------------------------------
 
             testeoPanel = new Panel()
             {
@@ -141,21 +148,8 @@ namespace MapaEstelar
 
 
         }
-        /*
-        private void GalaxyMapForm_MouseClick(object sender, MouseEventArgs e)
-        {
-            foreach (var system in galaxyMap.StarSystems)
-            {
-                if (Math.Abs(e.X - system.X) < 10 && Math.Abs(e.Y - system.Y) < 10)
-                {
-                    selectedSystem = system;
-                    //UpdateDetailsPanel(); // Actualizar el panel de detalles
-                    this.Invalidate(); // Redibujar la pantalla para reflejar la selección
-                    break;
-                }
-            }
-        }
-        */
+        
+        // EVENTO DE CLICK EN PANEL DE GALAXIA
 
         private void GalaxyMapForm_MouseClick(object sender, MouseEventArgs e)
         {
@@ -195,6 +189,49 @@ namespace MapaEstelar
                 }
             }
         }
+
+        // EVENTO DE CLICK EN PANEL DE SISTEMA SOLAR
+
+        private void SolarMapForm_MouseClick(object sender, MouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Right)
+            {
+                foreach (var system in galaxyMap.StarSystems)
+                {
+                    //int scaledX = (int)((system.X + offsetX) * zoomFactor);
+                    //int scaledY = (int)((system.Y + offsetY) * zoomFactor);
+
+                    if (Math.Abs(e.X - system.X) < 10 && Math.Abs(e.Y - system.Y) < 10)
+                    {
+                        selectedSystem = system;
+                        contextMenu.Show(this, e.Location);
+                        //this.Invalidate();
+                        solarMapPanel.Invalidate(); /*Linea importante para que se actualice el puntero*/
+                        break;
+                    }
+                }
+            }
+            if (e.Button == MouseButtons.Left)
+            {
+                foreach (var system in galaxyMap.StarSystems)
+                {
+                    int scaledX = (int)((system.X + offsetX) * zoomFactor);
+                    int scaledY = (int)((system.Y + offsetY) * zoomFactor);
+
+                    if (Math.Abs(e.X - system.X) < 10 && Math.Abs(e.Y - system.Y) < 10)
+                    {
+                        selectedSystem = system;
+                        //contextMenu.Show(this, e.Location);
+                        //UpdateDetailsPanel();
+                        //this.Invalidate();
+                        solarMapPanel.Invalidate(); /*Linea importante para que se actualice el puntero*/
+                        break;
+                    }
+                }
+            }
+        }
+
+        // PANEL DE DETALLES EN PANEL DE GALAXIAS
 
         private void UpdateDetailsPanel()
         {
@@ -251,6 +288,7 @@ namespace MapaEstelar
         }
 
 
+        // EVENTO DE CLICKS EN PANEL DE GALAXIA PARA MENÚ CONTEXTUAL
 
         private void ViewDetails_Click(object sender, EventArgs e)
         {
@@ -263,14 +301,8 @@ namespace MapaEstelar
             MessageBox.Show($"Creating route to {selectedSystem.Name}");
         }
 
-        // Método para mostrar información del sistema clickeado
-        //private void ShowSystemDetails(Graphics g, StarSystem system)
-        //{
-        //    g.DrawString("Selected System:", new Font("Arial", 10, FontStyle.Bold), Brushes.White, 10, 10);
-        //    g.DrawString($"Name: {system.Name}", new Font("Arial", 8), Brushes.White, 10, 30);
-        //    g.DrawString($"Position: ({system.X}, {system.Y})", new Font("Arial", 8), Brushes.White, 10, 50);
-        //    g.DrawString($"Connections: {system.ConnectedSystems.Count}", new Font("Arial", 8), Brushes.White, 10, 70);
-        //}
+        
+        // EVENTO QUE SE ENCARGA DE DIBUJAR EL MAPA ESTELAR EN PANEL DE GALAXIA
 
         private void estelarMapPanel_Paint(object sender, PaintEventArgs e)
         {
@@ -307,20 +339,15 @@ namespace MapaEstelar
                 int scaledY = (int)selectedSystem.Y;
                 g.DrawEllipse(Pens.Green, scaledX - 10, scaledY - 10, 20, 20);
 
-                //selectedSystem = null;
 
-                //foreach (var planet in selectedSystem.Planets)
-                //{
-                //    int planetX = scaledX + (int)(planet.DistanceFromStar * zoomFactor);
-                //    g.FillEllipse(Brushes.Blue, planetX - 3, scaledY - 3, 6, 6);
-                //    g.DrawString(planet.Name, new Font("Arial", 8), Brushes.Blue, planetX + 5, scaledY + 5);
-                //}
-
-                Console.WriteLine("evento desencadenado");
+                
             }
 
 
         }
+
+
+        // ACÁ IRÍA EL EVENTO PARA DIBUJAR EL SISTEMA SOLAR SELECCIONADO
 
 
         private void ShowSolarSystem_Click(object sender, EventArgs e)
@@ -345,68 +372,7 @@ namespace MapaEstelar
         }
 
 
-
-
-
-
-
-        // Métodos de Zoom y Paneo
-        /*
-        private void GalaxyMapForm_MouseWheel(object sender, MouseEventArgs e)
-        {
-            float oldZoomFactor = zoomFactor;
-            if (e.Delta > 0)
-            {
-                zoomFactor *= 1.1f;
-            }
-            else
-            {
-                zoomFactor /= 1.1f;
-            }
-
-            // Ajustar la posición de desplazamiento para centrarse en el punto de la rueda del mouse
-            offsetX = (int)((offsetX - e.X / oldZoomFactor) * (zoomFactor / oldZoomFactor) + e.X / zoomFactor);
-            offsetY = (int)((offsetY - e.Y / oldZoomFactor) * (zoomFactor / oldZoomFactor) + e.Y / zoomFactor);
-
-            this.Invalidate(); // Redibujar la pantalla con el nuevo factor de zoom
-        }
-
-        private void GalaxyMapForm_MouseDown(object sender, MouseEventArgs e)
-        {
-            if (e.Button == MouseButtons.Left)
-            {
-                lastMousePosition = e.Location;
-                isPanning = true;
-            }
-        }
-
-        private void GalaxyMapForm_MouseUp(object sender, MouseEventArgs e)
-        {
-            isPanning = false;
-        }
-
-        private void GalaxyMapForm_MouseMove(object sender, MouseEventArgs e)
-        {
-            if (isPanning)
-            {
-                offsetX += (e.X - lastMousePosition.X);
-                offsetY += (e.Y - lastMousePosition.Y);
-                lastMousePosition = e.Location;
-                this.Invalidate(); // Redibujar la pantalla con el nuevo desplazamiento
-            }
-        }
-
-
-
-
-        /*
-        [STAThread]
-        public static void Main()
-        {
-            Application.EnableVisualStyles();
-            Application.Run(new GalaxyMapForm());
-        }
-        */
+        
     }
 
 }
